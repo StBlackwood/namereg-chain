@@ -79,3 +79,29 @@ func (s *State) validateTransactionWithoutLock(tx Transaction) error {
 
 	return nil
 }
+
+func (s *State) Copy() *State {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	newNames := make(map[string]string)
+	for k, v := range s.Names {
+		newNames[k] = v
+	}
+
+	newNonces := make(map[string]uint64)
+	for k, v := range s.Nonces {
+		newNonces[k] = v
+	}
+
+	newAccounts := make(map[string]bool)
+	for k, v := range s.Accounts {
+		newAccounts[k] = v
+	}
+
+	return &State{
+		Names:    newNames,
+		Nonces:   newNonces,
+		Accounts: newAccounts,
+	}
+}

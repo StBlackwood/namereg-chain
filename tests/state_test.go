@@ -1,29 +1,9 @@
 package tests
 
 import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/hex"
 	"namereg-chain/core"
 	"testing"
 )
-
-func generateKeyPair() (*ecdsa.PrivateKey, []byte, string) {
-	priv, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	pubKey := elliptic.MarshalCompressed(priv.PublicKey.Curve, priv.PublicKey.X, priv.PublicKey.Y)
-	pubKeyHash := sha256.Sum256(pubKey)
-	address := hex.EncodeToString(pubKeyHash[:])
-	return priv, pubKey, address
-}
-
-func signTransaction(priv *ecdsa.PrivateKey, tx *core.Transaction) []byte {
-	hash := tx.Hash()
-	r, s, _ := ecdsa.Sign(rand.Reader, priv, hash)
-	sig := append(r.Bytes(), s.Bytes()...)
-	return sig
-}
 
 func TestState_ValidNameRegistration(t *testing.T) {
 	state := core.NewState()
