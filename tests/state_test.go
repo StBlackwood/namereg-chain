@@ -96,15 +96,32 @@ func TestState_UnauthenticatedAddress(t *testing.T) {
 	state := core.NewState()
 
 	// Generate keypair A
-	priv1, pubKey1, _ := generateKeyPair()
+	priv1, pubKey1, address1 := generateKeyPair()
 	// Generate fake address B (unrelated)
-	_, _, address2 := generateKeyPair()
+	priv2, pubKey2, _ := generateKeyPair()
 
-	// Try to sign a tx with A and claim it's from B
-	tx := core.Transaction{Name: "fake", Address: address2, Nonce: 0, PubKey: pubKey1}
+	tx := core.Transaction{
+		Name:    "alice",
+		Address: address1,
+		Nonce:   0,
+		PubKey:  pubKey1,
+	}
 	tx.Signature = signTransaction(priv1, &tx)
 
-	err := state.ApplyTransaction(tx)
+	if err := state.ApplyTransaction(tx); err != nil {
+		t.Fatalf("Expected successful registration, got error: %v", err)
+	}
+
+	// Try to sign a tx with B, to access address from A
+	tx2 := core.Transaction{
+		Name:    "alice2",
+		Address: address1,
+		Nonce:   1,
+		PubKey:  pubKey2,
+	}
+	tx2.Signature = signTransaction(priv2, &tx2)
+
+	err := state.ApplyTransaction(tx2)
 	if err == nil || err.Error() != "address doesn't match public key" {
 		t.Fatalf("Expected public key mismatch error, got %v", err)
 	}

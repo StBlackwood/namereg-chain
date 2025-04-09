@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"math/big"
+	"strconv"
 )
 
 type Transaction struct {
@@ -18,7 +19,7 @@ type Transaction struct {
 }
 
 func (tx *Transaction) Hash() []byte {
-	data := []byte(tx.Name + tx.Address + string(tx.Nonce))
+	data := []byte(tx.Name + tx.Address + strconv.FormatUint(tx.Nonce, 10))
 	hash := sha256.Sum256(data)
 	return hash[:]
 }
